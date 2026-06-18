@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Casarão Restaurante</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Cabeçalho -->
+    <header>
+
+        <div class="header-brand">
+            <span class="brand-dot"></span>
+            <h1>Casarão Restaurante</h1>
+        </div>
+
+        <nav id="nav-principal" style="display:none;">
+            <button onclick="mostrarTela('pedido')">
+                Novo Pedido
+            </button>
+
+            <button onclick="mostrarTela('relatorio')">
+                Relatório
+            </button>
+
+            <button onclick="mostrarTela('gerenciar')">
+                Gerenciar Garçons
+            </button>
+
+            <button id="btn-sair" onclick="fazerLogout()">
+                Sair
+            </button>
+        </nav>
+
+    </header>
+
+
+    <!-- Tela Login -->
+    <main id="login" class="tela ativa">
+        <section class="login-screen">
+            <div class="login-overlay"></div>
+            <div class="card login-card">
+                <label>Usuário</label>
+            <input type="text" id="usuario-login" placeholder="Digite seu usuário">
+
+            <label>Senha</label>
+            <input type="password" id="senha-login" placeholder="Digite sua senha">
+
+            <button class="btn-confirmar" onclick="loginRestaurante()">
+                Entrar
+            </button>
+
+            <p id="login-erro" class="erro"></p>
+        </section>
+    </main>
+
+
+    <!-- Tela Pedido -->
+    <main id="pedido" class="tela">
+
+        <!-- Cliente -->
+        <section class="card">
+
+            <h2>Dados do Cliente</h2>
+
+            <label>Nome do Cliente</label>
+            <input type="text" id="cliente">
+
+            <label>Número da Mesa</label>
+            <select id="mesa">
+                <option value="">Selecione a mesa</option>
+            </select>
+            <span id="mesa-status" style="display:block;margin-top:6px;color:#666;font-size:14px;"></span>
+
+            <select id="garcom">
+             <option value="">Carregando...</option>
+            </select>
+        </section>
+
+<!-- CARDÁPIO -->
+<section class="card">
+
+<h2 class="titulo-cardapio">🍽️ Cardápio Completo</h2>
+
+<!-- BEBIDAS -->
+<div class="categoria">
+
+<h3 class="titulo-categoria">🥤 Bebidas</h3>
+
+<div class="menu">
+
+<div class="item-menu">
+<img class="item-image" src="imagens/agua.png" alt="Água Mineral">
+<h3>Água Mineral</h3>
+<p>R$ 4</p>
+<span id="estoque-1">Estoque: 30</span>
+<button onclick="adicionarItem(1,'Água Mineral', 4, this)">Adicionar</button>
+</div>
+
+<div class="item-menu">
+<img class="item-image" src="imagens/refrigerantes.jpg" alt="Refrigerante">
+<h3>Refrigerante</h3>
+<p>R$ 8</p>
+<span id="estoque-2">Estoque: 20</span>
+<button onclick="adicionarItem(2,'Refrigerante', 8, this)">Adicionar</button>
+</div>
+
+<div class="item-menu">
+<img class="item-image" src="imagens/suco.png" alt="Suco Natural">
+<h3>Suco Natural</h3>
+<p>R$ 10</p>
+<span id="estoque-3">Estoque: 15</span>
+<button onclick="adicionarItem(3,'Suco Natural', 10, this)">Adicionar</button>
+</div>
+
+<div class="item-menu">
+<img class="item-image" src="imagens/cerveja.png" alt="Cerveja">
+<h3>Cerveja</h3>
+<p>R$ 12</p>
+<span id="estoque-4">Estoque: 40</span>
+<button onclick="adicionarItem(4,'Cerveja', 12, this)">Adicionar</button>
+</div>
+
+<div class="item-menu">
+<img class="item-image" src="imagens/caipirinha.png" alt="Caipirinha">
+<h3>Caipirinha</h3>
+<p>R$ 18</p>
+<span id="estoque-5">Estoque: 12</span>
+<button onclick="adicionarItem(5,'Caipirinha', 18, this)">Adicionar</button>
+</div>
+
+<div class="item-menu">
+<img class="item-image" src="imagens/vinho.png" alt="Vinho">
+<h3>Vinho</h3>
+<p>R$ 25</p>
+<span id="estoque-6">Estoque: 8</span>
+<button onclick="adicionarItem(6,'Vinho', 25, this)">Adicionar</button>
+</div>
+
+</div>
+</div>
+
+
+<!-- ENTRADAS -->
+<div class="categoria">
+
+<h3 class="titulo-categoria">🥗 Entradas</h3>
+
+<div class="menu">
+
+<div class="item-menu">
+<h3>Batata Frita</h3>
+<p>R$ 18</p>
+<span id="estoque-7">Estoque: 20</span>
+<button onclick="adicionarItem(7,'Batata Frita', 18, this)">Adicionar</button>
+</div>
+
+<div class="item-menu">
+<h3>Onion Rings</h3>
+<p>R$ 20</p>
+<span id="estoque-8">Estoque: 10</span>
+<button onclick="adicionarItem(8,'Onion Rings', 20, this)">Adicionar</button>
+</div>
+
+<div class="item-menu">
+<h3>Tábua de Frios</h3>
+<p>R$ 35</p>
+<span id="estoque-9">Estoque: 6</span>
+<button onclick="adicionarItem(9,'Tábua de Frios', 35, this)">Adicionar</button>
+</div>
+
+</div>
+</div>
+
+
+<!-- LANCHES -->
+<div class="categoria">
+
+<h3 class="titulo-categoria">🍔 Lanches</h3>
+
+<div class="menu">
+
+<div class="item-menu">
+<h3>Hambúrguer Artesanal</h3>
+<p>R$ 28</p>
+<span id="estoque-10">Estoque: 12</span>
+<button onclick="adicionarItem(10,'Hambúrguer Artesanal', 28, this)">Adicionar</button>
+</div>
+
+<div class="item-menu">
+<h3>X-Bacon</h3>
+<p>R$ 32</p>
+<span id="estoque-11">Estoque: 10</span>
+<button onclick="adicionarItem(11,'X-Bacon', 32, this)">Adicionar</button>
+</div>
+
+<div class="item-menu">
+<h3>Hot Dog Especial</h3>
+<p>R$ 18</p>
+<span id="estoque-12">Estoque: 15</span>
+<button onclick="adicionarItem(12,'Hot Dog Especial', 18, this)">Adicionar</button>
+</div>
+
+<div class="item-menu">
+<h3>Sanduíche Natural</h3>
+<p>R$ 16</p>
+<span id="estoque-13">Estoque: 10</span>
+<button onclick="adicionarItem(13,'Sanduíche Natural', 16, this)">Adicionar</button>
+</div>
+
+</div>
+</div>
+
+
+<!-- MASSAS -->
+<div class="categoria">
+
+<h3 class="titulo-categoria">🍝 Massas</h3>
+
+<div class="menu">
+
+<div class="item-menu">
+<h3>Lasanha</h3>
+<p>R$ 38</p>
+<span id="estoque-14">Estoque: 10</span>
+<button onclick="adicionarItem(14,'Lasanha', 38, this)">Adicionar</button>
+</div>
+
+<div class="item-menu">
+<h3>Pizza Grande</h3>
+<p>R$ 45</p>
+<span id="estoque-15">Estoque: 8</span>
+<button onclick="adicionarItem(15,'Pizza Grande', 45, this)">Adicionar</button>
+</div>
+
+<div class="item-menu">
+<h3>Macarronada</h3>
+<p>R$ 30</p>
+<span id="estoque-16">Estoque: 10</span>
+<button onclick="adicionarItem(16,'Macarronada', 30, this)">Adicionar</button>
+</div>
+
+<div class="item-menu">
+<h3>Fettuccine Alfredo</h3>
+<p>R$ 42</p>
+<span id="estoque-17">Estoque: 7</span>
+<button onclick="adicionarItem(17,'Fettuccine Alfredo', 42, this)">Adicionar</button>
+</div>
+
+</div>
+</div>
+
+
+<!-- PRATOS -->
+<div class="categoria">
+
+<h3 class="titulo-categoria">🍛 Pratos Principais</h3>
+
+<div class="menu">
+
+<div class="item-menu">
+<h3>Filé à Parmegiana</h3>
+<p>R$ 48</p>
+<span id="estoque-18">Estoque: 8</span>
+<button onclick="adicionarItem(18,'Filé à Parmegiana', 48, this)">Adicionar</button>
+</div>
+
+<div class="item-menu">
+<h3>Picanha Completa</h3>
+<p>R$ 75</p>
+<span id="estoque-19">Estoque: 5</span>
+<button onclick="adicionarItem(19,'Picanha Completa', 75, this)">Adicionar</button>
+</div>
+
+<div class="item-menu">
+<h3>Frango Grelhado</h3>
+<p>R$ 35</p>
+<span id="estoque-20">Estoque: 10</span>
+<button onclick="adicionarItem(20,'Frango Grelhado', 35, this)">Adicionar</button>
+</div>
+
+<div class="item-menu">
+<h3>Salmão ao Molho</h3>
+<p>R$ 65</p>
+<span id="estoque-21">Estoque: 6</span>
+<button onclick="adicionarItem(21,'Salmão ao Molho', 65, this)">Adicionar</button>
+</div>
+
+</div>
+</div>
+
+
+<!-- SOBREMESAS -->
+<div class="categoria">
+
+<h3 class="titulo-categoria">🍰 Sobremesas</h3>
+
+<div class="menu">
+
+<div class="item-menu">
+<h3>Pudim</h3>
+<p>R$ 14</p>
+<span id="estoque-22">Estoque: 10</span>
+<button onclick="adicionarItem(22,'Pudim', 14, this)">Adicionar</button>
+</div>
+
+<div class="item-menu">
+<h3>Brownie</h3>
+<p>R$ 18</p>
+<span id="estoque-23">Estoque: 8</span>
+<button onclick="adicionarItem(23,'Brownie', 18, this)">Adicionar</button>
+</div>
+
+<div class="item-menu">
+<h3>Sorvete</h3>
+<p>R$ 12</p>
+<span id="estoque-24">Estoque: 15</span>
+<button onclick="adicionarItem(24,'Sorvete', 12, this)">Adicionar</button>
+</div>
+
+<div class="item-menu">
+<h3>Petit Gateau</h3>
+<p>R$ 22</p>
+<span id="estoque-25">Estoque: 6</span>
+<button onclick="adicionarItem(25,'Petit Gateau', 22, this)">Adicionar</button>
+</div>
+
+</div>
+</div>
+
+</section> 
+         
+
+        <!-- Pedido -->
+        <section class="card">
+
+            <h2>Itens do Pedido</h2>
+
+            <div id="lista-pedido">
+
+                <p>Nenhum item adicionado.</p>
+
+            </div>
+
+            <h3 id="total">
+                Total: R$ 0
+            </h3>
+
+            <button class="btn-finalizar" onclick="abrirFinalizacao()">
+                Ir para Finalização
+            </button>
+
+        </section>
+
+    </main>
+
+
+    <!-- Segunda Tela -->
+    <main id="finalizacao" class="tela">
+
+        <section class="card">
+
+            <h2>Finalizar Pedido</h2>
+
+            <div id="resumo-pedido"></div>
+
+            <h3 id="total-final"></h3>
+
+            <button class="btn-confirmar" onclick="finalizarPedido()">
+                Confirmar Pedido
+            </button>
+
+        </section>
+
+    </main>
+
+
+    <!-- Relatório -->
+    <main id="relatorio" class="tela">
+
+        <section class="card">
+
+            <h2>Relatório</h2>
+
+            <div class="relatorio-box">
+
+                <div class="relatorio-item">
+                    <h3 id="total-pedidos">0</h3>
+                    <p>Pedidos do Período</p>
+                </div>
+
+                <div class="relatorio-item">
+                    <h3 id="faturamento-dia">R$ 0</h3>
+                    <p>Faturamento do Período</p>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="card">
+
+            <h2>Filtrar por Data</h2>
+
+            <div class="filtro-data">
+                <div>
+                    <label>Data Inicial</label>
+                    <input type="date" id="data-inicio">
+                </div>
+
+                <div>
+                    <label>Data Final</label>
+                    <input type="date" id="data-fim">
+                </div>
+
+                <button onclick="filtrarRelatorio()">Filtrar</button>
+            </div>
+
+        </section>
+
+        <section class="card">
+
+            <h2>💰 Faturamento por Categoria</h2>
+
+            <div id="faturamento-categoria" class="categoria-box">
+                <p>Carregando...</p>
+            </div>
+
+        </section>
+
+        <section class="card">
+
+            <h2>Últimos Pedidos</h2>
+
+            <div id="lista-relatorio">
+
+                <p>Nenhum pedido realizado.</p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Gerenciar Garçons -->
+    <main id="gerenciar" class="tela">
+
+        <section class="card">
+
+            <h2>Gerenciar Garçons</h2>
+
+            <div id="lista-garcons">
+                <p>Carregando garçons...</p>
+            </div>
+
+            <button class="btn-confirmar" onclick="salvarSalariosGarcons()">
+                Salvar Salários
+            </button>
+
+            <p id="garcom-erro" class="erro"></p>
+
+        </section>
+
+        <section class="card">
+            <h2>Mesas Ocupadas</h2>
+            <div id="lista-mesas-ocupadas">
+                <p>Carregando...</p>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="script.js"></script>
+<!-- Mensagem -->
+<div id="mensagem-final" class="mensagem">
+
+    <div class="mensagem-box">
+
+        <h2>✅ Pedido Finalizado!</h2>
+
+        <p>O pedido foi registrado com sucesso.</p>
+
+        <button onclick="fecharMensagem()">
+            Fechar
+        </button>
+
+    </div>
+
+</div>
+</body>
+</html>
