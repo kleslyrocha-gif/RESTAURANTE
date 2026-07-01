@@ -8,16 +8,45 @@ let pedidos = [];
 let mesasOcupadas = [];
 
 let garconsData = [];
+let perfilAtual = null;
 
-const telasPermitidas = ['pedido', 'relatorio', 'gerenciar', 'finalizacao'];
+function getPerfilAtual() {
+    return localStorage.getItem('restaurante_perfil') || perfilAtual || 'garcom';
+}
+
+function telasPermitidasParaPerfil(perfil) {
+    return perfil === 'gerente'
+        ? ['pedido', 'relatorio', 'gerenciar', 'finalizacao']
+        : ['pedido', 'relatorio', 'finalizacao'];
+}
+
+function podeAcessarTela(nomeTela) {
+    return telasPermitidasParaPerfil(getPerfilAtual()).includes(nomeTela);
+}
+
+function atualizarInterfacePorPerfil() {
+    const perfil = getPerfilAtual();
+    perfilAtual = perfil;
+
+    const botaoGerenciar = document.querySelector('nav button[data-tela="gerenciar"]');
+    if (botaoGerenciar) {
+        botaoGerenciar.style.display = perfil === 'gerente' ? 'inline-block' : 'none';
+    }
+
+    const nav = document.getElementById('nav-principal');
+    if (nav) {
+        nav.style.display = 'flex';
+    }
+}
 
 window.onload = function() {
     const logado = localStorage.getItem('restaurante_logado') === '1';
     const ultimaGuardada = localStorage.getItem('ultima_tela');
 
     if (logado) {
-        document.getElementById('nav-principal').style.display = 'flex';
-        const ultima = telasPermitidas.includes(ultimaGuardada) ? ultimaGuardada : 'pedido';
+        atualizarInterfacePorPerfil();
+        const telas = telasPermitidasParaPerfil(getPerfilAtual());
+        const ultima = telas.includes(ultimaGuardada) ? ultimaGuardada : 'pedido';
         mostrarTela(ultima);
     } else {
         document.getElementById('nav-principal').style.display = 'none';
@@ -37,6 +66,12 @@ window.onload = function() {
 function mostrarTela(nomeTela) {
     if (!document.getElementById(nomeTela)) return;
 
+    if (nomeTela !== 'login' && !podeAcessarTela(nomeTela)) {
+        nomeTela = 'pedido';
+    }
+
+    if (!document.getElementById(nomeTela)) return;
+
     let telas = document.querySelectorAll('.tela');
 
     telas.forEach(function(tela) {
@@ -47,20 +82,43 @@ function mostrarTela(nomeTela) {
     try { localStorage.setItem('ultima_tela', nomeTela); } catch(e) {}
 }
 
-function loginRestaurante() {
+async function loginRestaurante() {
     let usuario = document.getElementById('usuario-login').value.trim();
     let senha = document.getElementById('senha-login').value.trim();
+    let perfil = document.getElementById('tipo-acesso').value;
 
-    if (usuario === 'admin' && senha === '1234') {
-        document.getElementById('login-erro').innerText = '';
-        try {
-            localStorage.setItem('restaurante_logado', '1');
-            localStorage.setItem('ultima_tela', 'pedido');
-        } catch(e) {}
-        document.getElementById('nav-principal').style.display = 'flex';
-        mostrarTela('pedido');
-    } else {
-        document.getElementById('login-erro').innerText = 'Usuário ou senha incorretos.';
+    if (!usuario || !senha) {
+        document.getElementById('login-erro').innerText = 'Informe usuário e senha.';
+        return;
+    }
+
+    try {
+        let resposta = await fetch('api.php?acao=login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ usuario, senha, perfil })
+        });
+
+        let retorno = await resposta.json();
+
+        if (retorno.sucesso) {
+            document.getElementById('login-erro').innerText = '';
+            try {
+                localStorage.setItem('restaurante_logado', '1');
+                localStorage.setItem('restaurante_perfil', retorno.role);
+                localStorage.setItem('ultima_tela', 'pedido');
+            } catch(e) {}
+            atualizarInterfacePorPerfil();
+            document.getElementById('nav-principal').style.display = 'flex';
+            mostrarTela('pedido');
+        } else {
+            document.getElementById('login-erro').innerText = retorno.erro || 'Usuário ou senha incorretos.';
+        }
+    } catch (e) {
+        document.getElementById('login-erro').innerText = 'Erro ao conectar com o servidor.';
+        console.log(e);
     }
 }
 
@@ -70,6 +128,7 @@ function fazerLogout() {
     document.getElementById('login-erro').innerText = '';
     try {
         localStorage.removeItem('restaurante_logado');
+        localStorage.removeItem('restaurante_perfil');
         localStorage.removeItem('ultima_tela');
     } catch(e) {}
     document.getElementById('nav-principal').style.display = 'none';
@@ -439,6 +498,51 @@ async function salvarSalariosGarcons() {
         document.getElementById('garcom-erro').innerText = 'Erro de conexão ao salvar salários.';
     }
 }
+async function cadastrarGarcom() {
+
+    let nome = document.getElementById('novo-nome-garcom').value.trim();
+    let sobrenome = document.getElementById('novo-sobrenome-garcom').value.trim();
+    let salario = document.getElementById('novo-salario-garcom').value;
+
+    if (!nome) {
+        alert('Informe o nome do garçom.');
+        return;
+    }
+
+    try {
+
+        let resposta = await fetch('api.php?acao=cadastrar-garcom', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                nome,
+                sobrenome,
+                salario
+            })
+        });
+
+        let retorno = await resposta.json();
+
+        if (retorno.sucesso) {
+
+            document.getElementById('novo-nome-garcom').value = '';
+            document.getElementById('novo-sobrenome-garcom').value = '';
+            document.getElementById('novo-salario-garcom').value = '';
+
+            carregarGarcons();
+
+            alert('Garçom cadastrado com sucesso!');
+        } else {
+            alert(retorno.erro || 'Erro ao cadastrar.');
+        }
+
+    } catch (e) {
+        console.log(e);
+        alert('Erro de conexão.');
+    }
+}
 
 async function carregarRelatorio() {
 
@@ -480,15 +584,12 @@ let pedidos = JSON.parse(texto);
                 <strong>Status:</strong>
                 ${pedido.status === 'open'
                 ? '🟢 Ativo'
-                : '🔴 Cancelado'}
+                : 'Pedido cancelado'}
                 </p>
                 <p><small>${new Date(pedido.data_pedido).toLocaleString('pt-BR')}</small></p>
-                 <button
-class="btn-confirmar"
-style="background:#c92a2a;margin-top:8px;"
-onclick="cancelarPedidoRelatorio(${pedido.id})">
-Cancelar Pedido
-</button>
+                ${pedido.status === 'open'
+                ? `<button class="btn-cancelar-relatorio" onclick="cancelarPedidoRelatorio(${pedido.id})">Cancelar Pedido</button>`
+                : `<span class="pedido-cancelado-texto">Pedido cancelado</span>`}
         `;
     });
 
@@ -531,18 +632,25 @@ async function atualizarEstoqueTela() {
 
     let produtos = await resposta.json();
 
-    produtos.forEach(produto => {
+    if(elemento){
 
-        let elemento =
-        document.getElementById(`estoque-${produto.id}`);
+    elemento.innerText = `Estoque: ${produto.estoque}`;
 
-        if(elemento){
+    if(produto.estoque <= 5){
 
-            elemento.innerHTML =
-            `Estoque: ${produto.estoque}`;
-        }
+        elemento.style.color = 'red';
+        elemento.style.fontWeight = 'bold';
 
-    });
+        elemento.innerText =
+        `⚠ Estoque Baixo: ${produto.estoque}`;
+
+    }else{
+
+        elemento.style.color = '';
+        elemento.style.fontWeight = '';
+
+    }
+}
 
 }
 
@@ -703,8 +811,7 @@ function atualizarListaMesasOcupadas() {
     container.innerHTML = mesasOcupadas.map(m => `
         <div class="item-pedido">
             <span>Mesa ${m}</span>
-            <button class="btn-confirmar" style="background:#c92a2a;padding:6px 10px;border-radius:8px;" onclick="liberarMesa(${m})">Liberar</button>
-        </div>
+<button class="btn-liberar-mesa"onclick="liberarMesa(${m})">Liberar</button>        </div>
     `).join('');
 }
 

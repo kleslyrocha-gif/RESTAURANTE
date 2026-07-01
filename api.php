@@ -8,6 +8,49 @@ $acao = $_GET['acao'] ?? '';
 
 switch($acao){
 
+    case 'login':
+
+        $dados = json_decode(file_get_contents("php://input"), true);
+        $usuario = trim($dados['usuario'] ?? '');
+        $senha = trim($dados['senha'] ?? '');
+        $perfil = trim($dados['perfil'] ?? 'gerente');
+
+        $conn->query("CREATE TABLE IF NOT EXISTS usuarios (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            usuario VARCHAR(50) NOT NULL,
+            senha VARCHAR(255) NOT NULL,
+            perfil VARCHAR(20) NOT NULL,
+            nome VARCHAR(100) NOT NULL,
+            UNIQUE KEY usuario_perfil (usuario, perfil)
+        )");
+
+        $conn->query("INSERT IGNORE INTO usuarios (usuario, senha, perfil, nome) VALUES ('gerente', 'gerente123', 'gerente', 'Gerente')");
+        $conn->query("INSERT IGNORE INTO usuarios (usuario, senha, perfil, nome) VALUES ('garcom', 'garcom123', 'garcom', 'Garçom')");
+
+        $usuarioEsc = $conn->real_escape_string($usuario);
+        $senhaEsc = $conn->real_escape_string($senha);
+        $perfilEsc = $conn->real_escape_string($perfil);
+
+        $sql = "SELECT nome, perfil FROM usuarios WHERE usuario = '$usuarioEsc' AND senha = '$senhaEsc' AND perfil = '$perfilEsc' LIMIT 1";
+        $resultado = $conn->query($sql);
+
+        if ($resultado && $resultado->num_rows > 0) {
+            $linha = $resultado->fetch_assoc();
+
+            echo json_encode([
+                'sucesso' => true,
+                'role' => $linha['perfil'],
+                'nome' => $linha['nome']
+            ]);
+        } else {
+            echo json_encode([
+                'sucesso' => false,
+                'erro' => 'Usuário ou senha incorretos para este tipo de acesso.'
+            ]);
+        }
+
+    break;
+
     case 'garcons':
 
         $sql = "SELECT id, nome, sobrenome, salario FROM garcons";
@@ -47,7 +90,47 @@ switch($acao){
 
     break;
 
+case 'cadastrar-garcom':
 
+    $dados = json_decode(file_get_contents("php://input"), true);
+
+    $nome = $conn->real_escape_string($dados['nome'] ?? '');
+    $sobrenome = $conn->real_escape_string($dados['sobrenome'] ?? '');
+    $salario = floatval($dados['salario'] ?? 0);
+
+    if(empty($nome)){
+        echo json_encode([
+            "sucesso" => false,
+            "erro" => "Nome obrigatório"
+        ]);
+        break;
+    }
+
+    $sql = "
+    INSERT INTO garcons
+    (
+        nome,
+        sobrenome,
+        salario
+    )
+    VALUES
+    (
+        '$nome',
+        '$sobrenome',
+        $salario
+    )
+    ";
+
+    if($conn->query($sql)){
+        echo json_encode(["sucesso" => true]);
+    }else{
+        echo json_encode([
+            "sucesso" => false,
+            "erro" => $conn->error
+        ]);
+    }
+
+break;
     case 'produtos':
 
         $sql = "SELECT * FROM produtos";

@@ -27,7 +27,7 @@
                 Relatório
             </button>
 
-            <button onclick="mostrarTela('gerenciar')">
+            <button data-tela="gerenciar" onclick="mostrarTela('gerenciar')">
                 Gerenciar Garçons
             </button>
 
@@ -44,7 +44,13 @@
         <section class="login-screen">
             <div class="login-overlay"></div>
             <div class="card login-card">
-                <label>Usuário</label>
+                <label>Tipo de acesso</label>
+            <select id="tipo-acesso">
+                <option value="gerente">Gerente</option>
+                <option value="garcom">Garçom</option>
+            </select>
+
+            <label>Usuário</label>
             <input type="text" id="usuario-login" placeholder="Digite seu usuário">
 
             <label>Senha</label>
@@ -153,6 +159,7 @@
 <div class="menu">
 
 <div class="item-menu">
+<img class="item-image" src="imagens/batatafrita.png" alt="Batata Frita">
 <h3>Batata Frita</h3>
 <p>R$ 18</p>
 <span id="estoque-7">Estoque: 20</span>
@@ -160,6 +167,7 @@
 </div>
 
 <div class="item-menu">
+<img class="item-image" src="imagens/onion.png" alt="Onion Rings">
 <h3>Onion Rings</h3>
 <p>R$ 20</p>
 <span id="estoque-8">Estoque: 10</span>
@@ -167,6 +175,7 @@
 </div>
 
 <div class="item-menu">
+<img class="item-image" src="imagens/fatiados-alegra-1.png" alt="Tábua de Frios">
 <h3>Tábua de Frios</h3>
 <p>R$ 35</p>
 <span id="estoque-9">Estoque: 6</span>
@@ -185,6 +194,7 @@
 <div class="menu">
 
 <div class="item-menu">
+<img class="item-image" src="imagens/hamburguer.png" alt="Hambúrguer Artesanal">
 <h3>Hambúrguer Artesanal</h3>
 <p>R$ 28</p>
 <span id="estoque-10">Estoque: 12</span>
@@ -192,6 +202,7 @@
 </div>
 
 <div class="item-menu">
+<img class="item-image" src="imagens/xbacon.png" alt="X-Bacon">
 <h3>X-Bacon</h3>
 <p>R$ 32</p>
 <span id="estoque-11">Estoque: 10</span>
@@ -199,6 +210,7 @@
 </div>
 
 <div class="item-menu">
+<img class="item-image" src="imagens/hotdog.png" alt="Hot Dog Especial">
 <h3>Hot Dog Especial</h3>
 <p>R$ 18</p>
 <span id="estoque-12">Estoque: 15</span>
@@ -206,6 +218,7 @@
 </div>
 
 <div class="item-menu">
+<img class="item-image" src="imagens/sanduiche.png" alt="Sanduíche Natural">
 <h3>Sanduíche Natural</h3>
 <p>R$ 16</p>
 <span id="estoque-13">Estoque: 10</span>
@@ -224,6 +237,7 @@
 <div class="menu">
 
 <div class="item-menu">
+<img class="item-image" src="imagens/lasanha.png" alt="Lasanha">
 <h3>Lasanha</h3>
 <p>R$ 38</p>
 <span id="estoque-14">Estoque: 10</span>
@@ -231,6 +245,7 @@
 </div>
 
 <div class="item-menu">
+<img class="item-image" src="imagens/pizza.png" alt="Pizza Grande">
 <h3>Pizza Grande</h3>
 <p>R$ 45</p>
 <span id="estoque-15">Estoque: 8</span>
@@ -238,6 +253,7 @@
 </div>
 
 <div class="item-menu">
+<img class="item-image" src="imagens/macarronada.png" alt="Macarronada">
 <h3>Macarronada</h3>
 <p>R$ 30</p>
 <span id="estoque-16">Estoque: 10</span>
@@ -245,6 +261,7 @@
 </div>
 
 <div class="item-menu">
+<img class="item-image" src="imagens/fettucine.png" alt="Fettuccine Alfredo">
 <h3>Fettuccine Alfredo</h3>
 <p>R$ 42</p>
 <span id="estoque-17">Estoque: 7</span>
@@ -263,6 +280,7 @@
 <div class="menu">
 
 <div class="item-menu">
+<img class="item-image" src="imagens/file.png" alt="Filé à Parmegiana">
 <h3>Filé à Parmegiana</h3>
 <p>R$ 48</p>
 <span id="estoque-18">Estoque: 8</span>
@@ -270,6 +288,7 @@
 </div>
 
 <div class="item-menu">
+<img class="item-image" src="imagens/picanha.png" alt="Picanha Completa">
 <h3>Picanha Completa</h3>
 <p>R$ 75</p>
 <span id="estoque-19">Estoque: 5</span>
@@ -277,6 +296,7 @@
 </div>
 
 <div class="item-menu">
+<img class="item-image" src="imagens/frango.png" alt="Frango Grelhado">
 <h3>Frango Grelhado</h3>
 <p>R$ 35</p>
 <span id="estoque-20">Estoque: 10</span>
@@ -284,6 +304,7 @@
 </div>
 
 <div class="item-menu">
+<img class="item-image" src="imagens/salmao.png" alt="Salmão ao Molho">
 <h3>Salmão ao Molho</h3>
 <p>R$ 65</p>
 <span id="estoque-21">Estoque: 6</span>
@@ -302,6 +323,7 @@
 <div class="menu">
 
 <div class="item-menu">
+<img class="item-image" src="imagens/pudim.jpg" alt="Pudim">
 <h3>Pudim</h3>
 <p>R$ 14</p>
 <span id="estoque-22">Estoque: 10</span>
@@ -309,6 +331,7 @@
 </div>
 
 <div class="item-menu">
+<img class="item-image" src="imagens/brownie.png" alt="Brownie">
 <h3>Brownie</h3>
 <p>R$ 18</p>
 <span id="estoque-23">Estoque: 8</span>
@@ -316,6 +339,7 @@
 </div>
 
 <div class="item-menu">
+<img class="item-image" src="imagens/sorvete.png" alt="Sorvete">
 <h3>Sorvete</h3>
 <p>R$ 12</p>
 <span id="estoque-24">Estoque: 15</span>
@@ -323,6 +347,7 @@
 </div>
 
 <div class="item-menu">
+<img class="item-image" src="imagens/petit.jpg" alt="Petit Gateau">
 <h3>Petit Gateau</h3>
 <p>R$ 22</p>
 <span id="estoque-25">Estoque: 6</span>
@@ -451,9 +476,21 @@
 
         <section class="card">
 
-            <h2>Gerenciar Garçons</h2>
+    <h2>Gerenciar Garçons</h2>
 
-            <div id="lista-garcons">
+    <div class="cadastro-garcom">
+        <input type="text" id="novo-nome-garcom" placeholder="Nome">
+        <input type="text" id="novo-sobrenome-garcom" placeholder="Sobrenome">
+        <input type="number" id="novo-salario-garcom" placeholder="Salário" step="0.01">
+
+        <button onclick="cadastrarGarcom()">
+            Cadastrar Garçom
+        </button>
+    </div>
+
+    <hr style="margin:20px 0;">
+
+    <div id="lista-garcons">
                 <p>Carregando garçons...</p>
             </div>
 
