@@ -8,6 +8,7 @@ let pedidos = [];
 let mesasOcupadas = [];
 
 let garconsData = [];
+let produtosData = [];
 let perfilAtual = null;
 
 function getPerfilAtual() {
@@ -16,8 +17,8 @@ function getPerfilAtual() {
 
 function telasPermitidasParaPerfil(perfil) {
     return perfil === 'gerente'
-        ? ['pedido', 'relatorio', 'gerenciar', 'finalizacao']
-        : ['pedido', 'relatorio', 'finalizacao'];
+        ? ['pedido', 'relatorio', 'mesas-ocupadas', 'gerenciar', 'gerenciar-produtos', 'finalizacao']
+        : ['pedido', 'relatorio', 'mesas-ocupadas', 'finalizacao'];
 }
 
 function podeAcessarTela(nomeTela) {
@@ -29,8 +30,12 @@ function atualizarInterfacePorPerfil() {
     perfilAtual = perfil;
 
     const botaoGerenciar = document.querySelector('nav button[data-tela="gerenciar"]');
+    const botaoGerenciarProdutos = document.querySelector('nav button[data-tela="gerenciar-produtos"]');
     if (botaoGerenciar) {
         botaoGerenciar.style.display = perfil === 'gerente' ? 'inline-block' : 'none';
+    }
+    if (botaoGerenciarProdutos) {
+        botaoGerenciarProdutos.style.display = perfil === 'gerente' ? 'inline-block' : 'none';
     }
 
     const nav = document.getElementById('nav-principal');
@@ -58,6 +63,7 @@ window.onload = function() {
     carregarMesasOcupadas();
     carregarRelatorio();
     carregarProdutos();
+    carregarProdutosGerenciar();
     atualizarEstoqueTela();
     definirDatasRelatorio();
 }
@@ -211,9 +217,10 @@ function atualizarPedido() {
         lista.innerHTML += `
             <div class="item-pedido">
                 <span>${item.nome}</span>
-                <strong>
-                    ${item.quantidade}x - R$ ${item.preco * item.quantidade}
-                </strong>
+                <div class="item-actions">
+                    <strong>${item.quantidade}x - R$ ${item.preco * item.quantidade}</strong>
+                    <button class="btn-remover-item" onclick="removerItem(${item.produto_id})">Remover</button>
+                </div>
             </div>
         `;
     });
@@ -228,19 +235,23 @@ function atualizarPedido() {
         `Total: R$ ${total}`;
 }
 
+function removerItem(produtoId) {
+    pedido = pedido.filter(item => item.produto_id !== produtoId);
+    atualizarPedido();
+}
+
 
 // Abrir finalização
 function abrirFinalizacao() {
 
     let cliente = document.getElementById('cliente').value;
-
+    let cpf = document.getElementById('cliente-cpf').value;
+    let telefone = document.getElementById('cliente-telefone').value;
     let mesa = document.getElementById('mesa').value;
-
     let garcom = document.getElementById('garcom').value;
 
-    if (cliente === '' || mesa === '' || garcom === '') {
-
-        alert('Preencha todos os campos!');
+    if (cliente === '' || cpf === '' || telefone === '' || mesa === '' || garcom === '') {
+        alert('Preencha todos os campos do cliente!');
         return;
     }
 
@@ -267,8 +278,16 @@ function abrirFinalizacao() {
 
     let total = 0;
 
-    pedido.forEach(function(item) {
+    resumo.innerHTML += `
+        <div class="resumo-cliente">
+            <p><strong>Cliente:</strong> ${cliente}</p>
+            <p><strong>CPF:</strong> ${cpf}</p>
+            <p><strong>Telefone:</strong> ${telefone}</p>
+            <p><strong>Mesa:</strong> ${mesa}</p>
+        </div>
+    `;
 
+    pedido.forEach(function(item) {
         total += item.preco * item.quantidade;
 
         resumo.innerHTML += `
@@ -289,9 +308,9 @@ function abrirFinalizacao() {
 async function finalizarPedido() {
 
 let cliente = document.getElementById('cliente').value;
-
+let cpf = document.getElementById('cliente-cpf').value;
+let telefone = document.getElementById('cliente-telefone').value;
 let mesa = document.getElementById('mesa').value;
-
 let garcom = document.getElementById('garcom').value;
 
 let total = 0;
@@ -315,6 +334,8 @@ try {
         body: JSON.stringify({
 
             cliente: cliente,
+            cpf: cpf,
+            telefone: telefone,
             mesa: mesa,
             garcom: garcom,
             total: total,
@@ -343,6 +364,8 @@ try {
         atualizarPedido();
 
         document.getElementById('cliente').value = '';
+        document.getElementById('cliente-cpf').value = '';
+        document.getElementById('cliente-telefone').value = '';
         document.getElementById('mesa').value = '';
         document.getElementById('garcom').value = '';
         
@@ -453,10 +476,14 @@ function carregarListaGarcons(garcons) {
     lista.innerHTML = garcons.map(g => {
         let nomeCompleto = g.sobrenome ? `${g.nome} ${g.sobrenome}` : g.nome;
         let salario = g.salario !== undefined ? parseFloat(g.salario).toFixed(2) : '0.00';
+        let mesas = g.mesas ? g.mesas : 'Nenhuma mesa no momento';
 
         return `
             <div class="item-pedido item-garcom">
-                <span>${nomeCompleto}</span>
+                <div class="garcom-info">
+                    <span class="garcom-nome">${nomeCompleto}</span>
+                    <small class="garcom-mesa">Mesa(s): ${mesas}</small>
+                </div>
                 <div class="salario-bloco">
                     <label>Salário</label>
                     <input type="number" id="salario-garcom-${g.id}" value="${salario}" step="0.01" min="0" />
@@ -574,17 +601,20 @@ let pedidos = JSON.parse(texto);
             faturamento += parseFloat(pedido.total);
         }
 
+        let mesaTexto = pedido.mesa && pedido.mesa !== '0' ? `Mesa ${pedido.mesa}` : 'Mesa liberada';
+        let statusTexto = pedido.status === 'open'
+            ? (pedido.mesa && pedido.mesa !== '0' ? '🟢 Ativo' : '🟡 Mesa liberada')
+            : 'Pedido cancelado';
+
         lista.innerHTML += `
             <div class="pedido-relatorio">
                 <p><strong>Cliente:</strong> ${pedido.cliente}</p>
-                <p><strong>Mesa:</strong> ${pedido.mesa}</p>
+                <p><strong>Mesa:</strong> ${mesaTexto}</p>
                 <p><strong>Garçom:</strong> ${pedido.garcom}</p>
                 <p><strong>Total:</strong> R$ ${parseFloat(pedido.total).toFixed(2)}</p>
                 <p>
                 <strong>Status:</strong>
-                ${pedido.status === 'open'
-                ? '🟢 Ativo'
-                : 'Pedido cancelado'}
+                ${statusTexto}
                 </p>
                 <p><small>${new Date(pedido.data_pedido).toLocaleString('pt-BR')}</small></p>
                 ${pedido.status === 'open'
@@ -626,32 +656,127 @@ async function carregarProdutos(){
     });
 
 }
-async function atualizarEstoqueTela() {
 
-    let resposta = await fetch("api.php?acao=produtos");
-
-    let produtos = await resposta.json();
-
-    if(elemento){
-
-    elemento.innerText = `Estoque: ${produto.estoque}`;
-
-    if(produto.estoque <= 5){
-
-        elemento.style.color = 'red';
-        elemento.style.fontWeight = 'bold';
-
-        elemento.innerText =
-        `⚠ Estoque Baixo: ${produto.estoque}`;
-
-    }else{
-
-        elemento.style.color = '';
-        elemento.style.fontWeight = '';
-
+async function carregarProdutosGerenciar() {
+    try {
+        let resposta = await fetch("api.php?acao=produtos");
+        let produtos = await resposta.json();
+        produtosData = produtos;
+        exibirProdutosGerenciar(produtosData);
+    } catch (e) {
+        let container = document.getElementById('lista-produtos-gerenciamento');
+        if (container) {
+            container.innerHTML = '<p>Erro ao carregar produtos.</p>';
+        }
+        console.log('Erro ao carregar produtos para gerenciamento', e);
     }
 }
 
+function exibirProdutosGerenciar(produtos) {
+    let container = document.getElementById('lista-produtos-gerenciamento');
+    if (!container) return;
+
+    let busca = document.getElementById('busca-produto')?.value.toLowerCase().trim() || '';
+    let filtrados = produtos.filter(produto => produto.nome.toLowerCase().includes(busca));
+
+    if (filtrados.length === 0) {
+        container.innerHTML = '<p>Nenhum produto encontrado.</p>';
+        return;
+    }
+
+    container.innerHTML = filtrados.map(produto => `
+        <div class="produto-item">
+            <div class="produto-dados">
+                <span class="produto-nome">${produto.nome}</span>
+                <span class="produto-info">ID ${produto.id}</span>
+            </div>
+            <div class="produto-controls">
+                <div class="produto-edicao">
+                    <label>Preço</label>
+                    <input type="number" id="produto-preco-${produto.id}" value="${parseFloat(produto.preco).toFixed(2)}" step="0.01" min="0">
+                </div>
+                <div class="produto-edicao">
+                    <label>Estoque</label>
+                    <input type="number" id="produto-estoque-${produto.id}" value="${produto.estoque}" min="0">
+                </div>
+                <button class="btn-confirmar" onclick="salvarProduto(${produto.id})">Salvar</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function filtrarProdutosGerenciar() {
+    exibirProdutosGerenciar(produtosData);
+}
+
+function formatCPF(input) {
+    let value = input.value.replace(/\D/g, '').slice(0, 11);
+    value = value.replace(/(\d{3})(\d)/, '$1.$2');
+    value = value.replace(/(\d{3})\.(\d{3})(\d)/, '$1.$2.$3');
+    value = value.replace(/(\d{3})\.(\d{3})\.(\d{3})(\d)/, '$1.$2.$3-$4');
+    input.value = value;
+}
+
+function formatTelefone(input) {
+    let value = input.value.replace(/\D/g, '').slice(0, 11);
+    if (value.length > 10) {
+        value = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    } else {
+        value = value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+    }
+    input.value = value;
+}
+
+async function salvarProduto(id) {
+    let precoInput = document.getElementById(`produto-preco-${id}`);
+    let estoqueInput = document.getElementById(`produto-estoque-${id}`);
+
+    if (!precoInput || !estoqueInput) return;
+
+    let preco = parseFloat(precoInput.value) || 0;
+    let estoque = parseInt(estoqueInput.value) || 0;
+
+    try {
+        let resposta = await fetch('api.php?acao=atualizar-produto', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id, preco, estoque })
+        });
+
+        let retorno = await resposta.json();
+        if (retorno.sucesso) {
+            alert('Produto atualizado com sucesso!');
+            carregarProdutos();
+            carregarProdutosGerenciar();
+        } else {
+            alert('Erro ao atualizar produto: ' + (retorno.erro || ''));
+        }
+    } catch (e) {
+        console.log(e);
+        alert('Erro de conexão ao atualizar produto.');
+    }
+}
+
+async function atualizarEstoqueTela() {
+    let resposta = await fetch("api.php?acao=produtos");
+    let produtos = await resposta.json();
+
+    produtos.forEach(produto => {
+        let elemento = document.getElementById(`estoque-${produto.id}`);
+        if (!elemento) return;
+
+        if (produto.estoque <= 5) {
+            elemento.style.color = 'red';
+            elemento.style.fontWeight = 'bold';
+            elemento.innerText = `⚠ Estoque Baixo: ${produto.estoque}`;
+        } else {
+            elemento.style.color = '';
+            elemento.style.fontWeight = '';
+            elemento.innerText = `Estoque: ${produto.estoque}`;
+        }
+    });
 }
 
 function definirDatasRelatorio() {
@@ -717,6 +842,8 @@ function cancelarPedido() {
     pedido = [];
     atualizarPedido();
     document.getElementById('cliente').value = '';
+    document.getElementById('cliente-cpf').value = '';
+    document.getElementById('cliente-telefone').value = '';
     document.getElementById('mesa').value = '';
     document.getElementById('garcom').value = '';
 
@@ -811,11 +938,17 @@ function atualizarListaMesasOcupadas() {
     container.innerHTML = mesasOcupadas.map(m => `
         <div class="item-pedido">
             <span>Mesa ${m}</span>
-<button class="btn-liberar-mesa"onclick="liberarMesa(${m})">Liberar</button>        </div>
+            <button class="btn-liberar-mesa" onclick="liberarMesa(${m})">Desocupar Mesa</button>
+        </div>
     `).join('');
 }
 
 async function liberarMesa(mesa) {
+    if (!mesa || mesa === '0') {
+        alert('Mesa inválida.');
+        return;
+    }
+
     if (!confirm(`Confirma liberar a mesa ${mesa}?`)) return;
 
     try {

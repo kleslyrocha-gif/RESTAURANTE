@@ -320,9 +320,98 @@ select:focus {
     gap: 12px;
 }
 
+.item-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.produto-filtro {
+    margin-bottom: 18px;
+}
+
+.produto-filtro input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--text);
+}
+
+.produto-item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    align-items: center;
+    border: 1px solid var(--border);
+    background: var(--surface-muted);
+    padding: 18px;
+    border-radius: 16px;
+    margin-bottom: 14px;
+}
+
+.produto-dados {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.produto-nome {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.produto-info {
+    color: var(--muted);
+    font-size: 0.92rem;
+}
+
+.produto-controls {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(120px, 1fr));
+    gap: 12px;
+    align-items: end;
+}
+
+.produto-edicao {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.produto-edicao label {
+    font-size: 0.88rem;
+    color: var(--muted);
+}
+
+.produto-edicao input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-size: 0.95rem;
+}
+
 .item-pedido strong,
 .pedido-relatorio strong {
     white-space: nowrap;
+}
+
+.btn-remover-item {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 10px;
+    background: #dc2626;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 700;
+    transition: background 0.2s ease;
+}
+
+.btn-remover-item:hover {
+    background: #b91c1c;
 }
 
 #total,
@@ -600,16 +689,82 @@ select:focus {
     gap:10px;
     flex-wrap:wrap;
     margin-bottom:20px;
+    align-items:flex-end;
 }
 
 .cadastro-garcom input{
     flex:1;
     min-width:180px;
+    padding:12px 14px;
+    border:1px solid var(--border);
+    border-radius:14px;
+    background: var(--surface);
 }
 
-.cadastro-garcom button{
+.cadastro-garcom button,
+.btn-cadastrar-garcom {
     width:auto;
-    padding:10px 18px;
+    padding:12px 22px;
+    border:none;
+    border-radius:14px;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    color:#fff;
+    font-weight:700;
+    box-shadow:0 10px 25px rgba(37, 99, 235, 0.18);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cadastro-garcom button:hover,
+.btn-cadastrar-garcom:hover {
+    transform: translateY(-2px);
+    box-shadow:0 14px 30px rgba(37, 99, 235, 0.25);
+}
+
+.item-garcom {
+    display:grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    align-items: center;
+    padding: 18px;
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.garcom-info {
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+}
+
+.garcom-nome {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.garcom-mesa {
+    color: var(--muted);
+    font-size: 0.92rem;
+}
+
+.salario-bloco {
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    min-width:220px;
+}
+
+.salario-bloco label {
+    color: var(--muted);
+    font-size: 0.88rem;
+}
+
+.salario-bloco input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--surface);
 }
 
 /* Botão liberar menor */

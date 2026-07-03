@@ -27,6 +27,14 @@
                 Relatório
             </button>
 
+            <button onclick="mostrarTela('mesas-ocupadas')">
+                Mesas Ocupadas
+            </button>
+
+            <button data-tela="gerenciar-produtos" onclick="mostrarTela('gerenciar-produtos')">
+                Gerenciar Produtos
+            </button>
+
             <button data-tela="gerenciar" onclick="mostrarTela('gerenciar')">
                 Gerenciar Garçons
             </button>
@@ -75,6 +83,12 @@
 
             <label>Nome do Cliente</label>
             <input type="text" id="cliente">
+
+            <label>CPF</label>
+            <input type="text" id="cliente-cpf" placeholder="000.000.000-00" maxlength="14" inputmode="numeric" pattern="\d{3}\.\d{3}\.\d{3}-\d{2}" oninput="formatCPF(this)">
+
+            <label>Telefone</label>
+            <input type="tel" id="cliente-telefone" placeholder="(00) 00000-0000" maxlength="15" inputmode="numeric" pattern="\(\d{2}\) \d{4,5}-\d{4}" oninput="formatTelefone(this)">
 
             <label>Número da Mesa</label>
             <select id="mesa">
@@ -471,6 +485,32 @@
 
     </main>
 
+    <!-- Mesas Ocupadas -->
+    <main id="mesas-ocupadas" class="tela">
+
+        <section class="card">
+            <h2>Mesas Ocupadas</h2>
+            <div id="lista-mesas-ocupadas">
+                <p>Carregando...</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Gerenciar Produtos -->
+    <main id="gerenciar-produtos" class="tela">
+
+        <section class="card">
+            <h2>Gerenciar Produtos</h2>
+            <div class="produto-filtro">
+                <input type="search" id="busca-produto" placeholder="Pesquisar produto..." oninput="filtrarProdutosGerenciar()">
+            </div>
+            <div id="lista-produtos-gerenciamento">
+                <p>Carregando produtos...</p>
+            </div>
+        </section>
+    </main>
+
     <!-- Gerenciar Garçons -->
     <main id="gerenciar" class="tela">
 
@@ -483,8 +523,8 @@
         <input type="text" id="novo-sobrenome-garcom" placeholder="Sobrenome">
         <input type="number" id="novo-salario-garcom" placeholder="Salário" step="0.01">
 
-        <button onclick="cadastrarGarcom()">
-            Cadastrar Garçom
+        <button class="btn-cadastrar-garcom" onclick="cadastrarGarcom()">
+            + Cadastrar Garçom
         </button>
     </div>
 
@@ -500,13 +540,6 @@
 
             <p id="garcom-erro" class="erro"></p>
 
-        </section>
-
-        <section class="card">
-            <h2>Mesas Ocupadas</h2>
-            <div id="lista-mesas-ocupadas">
-                <p>Carregando...</p>
-            </div>
         </section>
 
     </main>

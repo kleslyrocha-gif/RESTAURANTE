@@ -53,13 +53,21 @@ switch($acao){
 
     case 'garcons':
 
-        $sql = "SELECT id, nome, sobrenome, salario FROM garcons";
+        $sql = "SELECT g.id, g.nome, g.sobrenome, g.salario,
+            GROUP_CONCAT(DISTINCT p.mesa ORDER BY p.mesa SEPARATOR ', ') AS mesas
+            FROM garcons g
+            LEFT JOIN pedidos p ON p.garcom_id = g.id AND p.status = 'open'
+            GROUP BY g.id, g.nome, g.sobrenome, g.salario
+            ORDER BY g.id ASC";
 
         $resultado = $conn->query($sql);
 
         $dados = [];
 
         while($linha = $resultado->fetch_assoc()){
+            if ($linha['mesas'] === null) {
+                $linha['mesas'] = '';
+            }
             $dados[] = $linha;
         }
 
@@ -147,19 +155,49 @@ break;
 
     break;
 
+    case 'atualizar-produto':
+
+        $dados = json_decode(file_get_contents("php://input"), true);
+        $id = intval($dados['id'] ?? 0);
+        $preco = floatval($dados['preco'] ?? 0);
+        $estoque = intval($dados['estoque'] ?? 0);
+
+        if ($id <= 0) {
+            echo json_encode(["sucesso" => false, "erro" => "ID de produto inválido"]);
+            break;
+        }
+
+        $sql = "UPDATE produtos SET preco = $preco, estoque = $estoque WHERE id = $id";
+
+        if ($conn->query($sql)) {
+            echo json_encode(["sucesso" => true]);
+        } else {
+            echo json_encode(["sucesso" => false, "erro" => $conn->error]);
+        }
+
+    break;
 
     case 'pedido':
 
         $dados = json_decode(file_get_contents("php://input"), true);
 
-        $cliente = $conn->real_escape_string($dados['cliente']);
+        $cliente = $conn->real_escape_string($dados['cliente'] ?? '');
+        $cpf = $conn->real_escape_string($dados['cpf'] ?? '');
+        $telefone = $conn->real_escape_string($dados['telefone'] ?? '');
         $mesa = intval($dados['mesa']);
         $garcom = intval($dados['garcom']);
         $total = floatval($dados['total']);
 
+        $conn->query("CREATE TABLE IF NOT EXISTS clientes (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            nome VARCHAR(100) NOT NULL,
+            cpf VARCHAR(20) DEFAULT NULL,
+            telefone VARCHAR(20) DEFAULT NULL
+        )");
+
         $sqlCliente = "
-        INSERT INTO clientes(nome)
-        VALUES('$cliente')
+        INSERT INTO clientes(nome, cpf, telefone)
+        VALUES('$cliente', '$cpf', '$telefone')
         ";
 
         if (!$conn->query($sqlCliente)) {
@@ -381,7 +419,7 @@ break;
 
     case 'mesas-ocupadas':
 
-        $sql = "SELECT DISTINCT mesa FROM pedidos WHERE status = 'open' AND mesa IS NOT NULL";
+        $sql = "SELECT DISTINCT mesa FROM pedidos WHERE status = 'open' AND mesa IS NOT NULL AND mesa > 0";
         $resultado = $conn->query($sql);
 
         $mesas = [];
@@ -409,7 +447,8 @@ break;
             break;
         }
 
-        $sql = "UPDATE pedidos SET status = 'closed' WHERE mesa = $mesa AND status = 'open'";
+        // liberar apenas a mesa, sem cancelar o pedido
+        $sql = "UPDATE pedidos SET mesa = NULL WHERE mesa = $mesa AND status = 'open'";
 
         if ($conn->query($sql)) {
             echo json_encode(["sucesso" => true]);
