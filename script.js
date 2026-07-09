@@ -18,7 +18,7 @@ function getPerfilAtual() {
 function telasPermitidasParaPerfil(perfil) {
     return perfil === 'gerente'
         ? ['pedido', 'relatorio', 'mesas-ocupadas', 'gerenciar', 'gerenciar-produtos', 'finalizacao']
-        : ['pedido', 'relatorio', 'mesas-ocupadas', 'finalizacao'];
+        : ['pedido', 'mesas-ocupadas', 'finalizacao'];
 }
 
 function podeAcessarTela(nomeTela) {
@@ -93,8 +93,11 @@ async function loginRestaurante() {
     let senha = document.getElementById('senha-login').value.trim();
     let perfil = document.getElementById('tipo-acesso').value;
 
+    const erro = document.getElementById('login-erro');
+
     if (!usuario || !senha) {
-        document.getElementById('login-erro').innerText = 'Informe usuário e senha.';
+        erro.innerText = 'Informe usuário e senha.';
+        erro.style.display = 'block';
         return;
     }
 
@@ -110,7 +113,8 @@ async function loginRestaurante() {
         let retorno = await resposta.json();
 
         if (retorno.sucesso) {
-            document.getElementById('login-erro').innerText = '';
+            erro.innerText = '';
+            erro.style.display = 'none';
             try {
                 localStorage.setItem('restaurante_logado', '1');
                 localStorage.setItem('restaurante_perfil', retorno.role);
@@ -120,10 +124,12 @@ async function loginRestaurante() {
             document.getElementById('nav-principal').style.display = 'flex';
             mostrarTela('pedido');
         } else {
-            document.getElementById('login-erro').innerText = retorno.erro || 'Usuário ou senha incorretos.';
+            erro.innerText = retorno.erro || 'Usuário ou senha incorretos.';
+            erro.style.display = 'block';
         }
     } catch (e) {
-        document.getElementById('login-erro').innerText = 'Erro ao conectar com o servidor.';
+        erro.innerText = 'Erro ao conectar com o servidor.';
+        erro.style.display = 'block';
         console.log(e);
     }
 }
@@ -131,7 +137,9 @@ async function loginRestaurante() {
 function fazerLogout() {
     document.getElementById('usuario-login').value = '';
     document.getElementById('senha-login').value = '';
-    document.getElementById('login-erro').innerText = '';
+    const erro = document.getElementById('login-erro');
+    erro.innerText = '';
+    erro.style.display = 'none';
     try {
         localStorage.removeItem('restaurante_logado');
         localStorage.removeItem('restaurante_perfil');
@@ -141,6 +149,17 @@ function fazerLogout() {
     mostrarTela('login');
 }
 
+function alternarVisibilidadeSenha() {
+    const input = document.getElementById('senha-login');
+    const botao = document.querySelector('.btn-olho');
+
+    if (!input || !botao) return;
+
+    const mostrando = input.type === 'text';
+    input.type = mostrando ? 'password' : 'text';
+    botao.innerHTML = mostrando ? '👁' : '🙈';
+    botao.setAttribute('aria-label', mostrando ? 'Mostrar senha' : 'Ocultar senha');
+}
 
 function adicionarItem(id, nome, preco, botao) {
     let estoqueElemento =
@@ -314,6 +333,12 @@ let mesa = document.getElementById('mesa').value;
 let garcom = document.getElementById('garcom').value;
 
 let total = 0;
+let formaPagamento = document.getElementById('forma-pagamento').value;
+
+if (!formaPagamento) {
+    alert('Selecione a forma de pagamento.');
+    return;
+}
 
 pedido.forEach(function(item) {
 
@@ -339,6 +364,7 @@ try {
             mesa: mesa,
             garcom: garcom,
             total: total,
+            forma_pagamento: formaPagamento,
             itens: pedido
 
         })
@@ -368,6 +394,7 @@ try {
         document.getElementById('cliente-telefone').value = '';
         document.getElementById('mesa').value = '';
         document.getElementById('garcom').value = '';
+        document.getElementById('forma-pagamento').value = '';
         
         // atualizar relatório imediatamente após novo pedido
         try { carregarRelatorio(); carregarFaturamentoCategoria(); } catch(e) { console.log(e); }
@@ -408,6 +435,8 @@ function atualizarRelatorio() {
                 <p><strong>Mesa:</strong> ${pedido.mesa}</p>
 
                 <p><strong>Garçom:</strong> ${pedido.garcom}</p>
+
+                <p><strong>Pagamento:</strong> ${pedido.forma_pagamento ? pedido.forma_pagamento.toUpperCase() : 'Não informado'}</p>
 
                 <p><strong>Total:</strong> R$ ${pedido.total}</p>
 
@@ -571,6 +600,102 @@ async function cadastrarGarcom() {
     }
 }
 
+function formatarFormaPagamento(forma) {
+    const mapa = {
+        pix: 'Pix',
+        dinheiro: 'Dinheiro',
+        debito: 'Débito',
+        credito: 'Crédito',
+        'nao-informado': 'Não informado'
+    };
+
+    if (!forma) return 'Não informado';
+
+    const valor = String(forma).toLowerCase();
+    return mapa[valor] || valor.charAt(0).toUpperCase() + valor.slice(1);
+}
+
+function renderizarFechamentoCaixa(pedidos) {
+    let container = document.getElementById('resumo-fechamento-caixa');
+    if (!container) return;
+
+    let pedidosAtivos = pedidos.filter(p => String(p.status || '').toLowerCase() === 'open');
+    let resumo = {};
+
+    pedidosAtivos.forEach(function(pedido) {
+        let forma = pedido.forma_pagamento ? String(pedido.forma_pagamento).toLowerCase() : 'nao-informado';
+
+        if (!resumo[forma]) {
+            resumo[forma] = {
+                nome: formatarFormaPagamento(forma),
+                total: 0,
+                quantidade: 0
+            };
+        }
+
+        resumo[forma].total += parseFloat(pedido.total || 0);
+        resumo[forma].quantidade += 1;
+    });
+
+    if (pedidosAtivos.length === 0) {
+        container.innerHTML = '<p>Nenhum pedido aberto para este período.</p>';
+        return;
+    }
+
+    let totalGeral = pedidosAtivos.reduce((acc, pedido) => acc + parseFloat(pedido.total || 0), 0);
+
+    container.innerHTML = `
+        <div class="fechamento-caixa-total">
+            <span>Total do período:</span>
+            <span>R$ ${totalGeral.toFixed(2)}</span>
+        </div>
+        <div class="fechamento-lista">
+            ${pedidosAtivos.map(pedido => `
+                <div class="fechamento-item">
+                    <div>
+                        <strong>${pedido.cliente || 'Cliente não informado'}</strong>
+                        <div>${formatarFormaPagamento(pedido.forma_pagamento)} · Mesa ${pedido.mesa || '—'}</div>
+                    </div>
+                    <span>R$ ${parseFloat(pedido.total || 0).toFixed(2)}</span>
+                </div>
+            `).join('')}
+        </div>
+        <div class="fechamento-caixa-total" style="margin-top: 10px;">
+            <span>Resumo por pagamento</span>
+        </div>
+        ${Object.values(resumo).map(item => `
+            <div class="fechamento-item">
+                <span>${item.nome}</span>
+                <strong>${item.quantidade} pedido(s)</strong>
+                <span>R$ ${item.total.toFixed(2)}</span>
+            </div>
+        `).join('')}
+    `;
+}
+
+function imprimirFechamentoCaixa() {
+    const fechamento = document.getElementById('resumo-fechamento-caixa');
+    if (!fechamento) return;
+
+    const totalGeral = fechamento.querySelector('.fechamento-caixa-total')?.textContent || '';
+    const conteudoOriginal = document.body.innerHTML;
+    const conteudoImpressao = `
+        <div style="font-family: Arial, sans-serif; padding: 24px; max-width: 700px; margin: 0 auto;">
+            <h2 style="margin-bottom: 12px;">Fechamento de Caixa</h2>
+            <p style="margin-bottom: 16px;">Resumo do período</p>
+            <div>${fechamento.innerHTML}</div>
+            <div style="margin-top: 16px; border-top: 1px solid #ddd; padding-top: 12px; font-weight: bold; font-size: 16px;">
+                ${totalGeral}
+            </div>
+        </div>
+    `;
+
+    document.body.innerHTML = conteudoImpressao;
+    window.print();
+    document.body.innerHTML = conteudoOriginal;
+    window.location.reload();
+}
+
 async function carregarRelatorio() {
 
     let dataInicio = document.getElementById('data-inicio').value || 
@@ -578,6 +703,8 @@ async function carregarRelatorio() {
     
     let dataFim = document.getElementById('data-fim').value || 
         new Date().toISOString().split('T')[0];
+
+    let filtroStatus = document.getElementById('filtro-status-pedido')?.value || 'todos';
 
     let resposta = await fetch(
     `api.php?acao=relatorio&data_inicio=${dataInicio}&data_fim=${dataFim}`
@@ -596,30 +723,36 @@ let pedidos = JSON.parse(texto);
     let faturamento = 0;
 
     pedidos.forEach(pedido => {
+        let statusPedido = String(pedido.status || '').toLowerCase();
 
-       if(pedido.status === 'open'){
-            faturamento += parseFloat(pedido.total);
+        if (filtroStatus !== 'todos' && statusPedido !== filtroStatus) {
+            return;
+        }
+
+        if (statusPedido === 'open') {
+            faturamento += parseFloat(pedido.total || 0);
         }
 
         let mesaTexto = pedido.mesa && pedido.mesa !== '0' ? `Mesa ${pedido.mesa}` : 'Mesa liberada';
-        let statusTexto = pedido.status === 'open'
+        let statusTexto = statusPedido === 'open'
             ? (pedido.mesa && pedido.mesa !== '0' ? '🟢 Ativo' : '🟡 Mesa liberada')
-            : 'Pedido cancelado';
+            : '❌ Cancelado';
 
         lista.innerHTML += `
             <div class="pedido-relatorio">
-                <p><strong>Cliente:</strong> ${pedido.cliente}</p>
+                <p><strong>Cliente:</strong> ${pedido.cliente || 'Cliente não informado'}</p>
                 <p><strong>Mesa:</strong> ${mesaTexto}</p>
-                <p><strong>Garçom:</strong> ${pedido.garcom}</p>
-                <p><strong>Total:</strong> R$ ${parseFloat(pedido.total).toFixed(2)}</p>
+                <p><strong>Garçom:</strong> ${pedido.garcom || 'Não informado'}</p>
+                <p><strong>Pagamento:</strong> ${formatarFormaPagamento(pedido.forma_pagamento)}</p>
+                <p><strong>Total:</strong> R$ ${parseFloat(pedido.total || 0).toFixed(2)}</p>
                 <p>
                 <strong>Status:</strong>
                 ${statusTexto}
                 </p>
                 <p><small>${new Date(pedido.data_pedido).toLocaleString('pt-BR')}</small></p>
-                ${pedido.status === 'open'
-                ? `<button class="btn-cancelar-relatorio" onclick="cancelarPedidoRelatorio(${pedido.id})">Cancelar Pedido</button>`
-                : `<span class="pedido-cancelado-texto">Pedido cancelado</span>`}
+                ${statusPedido === 'open'
+                    ? `<button class="btn-cancelar-relatorio" onclick="cancelarPedidoRelatorio(${pedido.id})">Cancelar Pedido</button>`
+                    : `<span class="pedido-cancelado-texto">Pedido cancelado</span>`}
         `;
     });
 
@@ -628,6 +761,7 @@ let pedidos = JSON.parse(texto);
     document.getElementById("faturamento-dia").innerHTML = 
         "R$ " + faturamento.toFixed(2);
 
+    renderizarFechamentoCaixa(pedidos);
     carregarFaturamentoCategoria();
 }
 

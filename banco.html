@@ -28,7 +28,7 @@
             </button>
 
             <button onclick="mostrarTela('mesas-ocupadas')">
-                Mesas Ocupadas
+                Desocupar Mesas
             </button>
 
             <button data-tela="gerenciar-produtos" onclick="mostrarTela('gerenciar-produtos')">
@@ -62,13 +62,16 @@
             <input type="text" id="usuario-login" placeholder="Digite seu usuário">
 
             <label>Senha</label>
-            <input type="password" id="senha-login" placeholder="Digite sua senha">
+            <div class="senha-wrapper">
+                <input type="password" id="senha-login" placeholder="Digite sua senha">
+                <button type="button" class="btn-olho" onclick="alternarVisibilidadeSenha()" aria-label="Mostrar senha">👁</button>
+            </div>
+
+            <p id="login-erro" class="erro" style="display:none;"></p>
 
             <button class="btn-confirmar" onclick="loginRestaurante()">
                 Entrar
             </button>
-
-            <p id="login-erro" class="erro"></p>
         </section>
     </main>
 
@@ -409,6 +412,15 @@
 
             <h3 id="total-final"></h3>
 
+            <label for="forma-pagamento">Forma de pagamento</label>
+            <select id="forma-pagamento">
+                <option value="">Selecione a forma de pagamento</option>
+                <option value="pix">Pix</option>
+                <option value="dinheiro">Dinheiro</option>
+                <option value="debito">Débito</option>
+                <option value="credito">Crédito</option>
+            </select>
+
             <button class="btn-confirmar" onclick="finalizarPedido()">
                 Confirmar Pedido
             </button>
@@ -463,6 +475,19 @@
 
         <section class="card">
 
+            <div class="fechamento-caixa-header">
+                <h2>🧾 Fechamento de Caixa</h2>
+                <button class="btn-imprimir" onclick="imprimirFechamentoCaixa()">Imprimir</button>
+            </div>
+
+            <div id="resumo-fechamento-caixa" class="fechamento-caixa-box">
+                <p>Carregando...</p>
+            </div>
+
+        </section>
+
+        <section class="card">
+
             <h2>💰 Faturamento por Categoria</h2>
 
             <div id="faturamento-categoria" class="categoria-box">
@@ -474,6 +499,15 @@
         <section class="card">
 
             <h2>Últimos Pedidos</h2>
+
+            <div class="filtro-status-relatorio">
+                <label for="filtro-status-pedido">Filtrar por status</label>
+                <select id="filtro-status-pedido" onchange="filtrarRelatorio()">
+                    <option value="todos">Todos</option>
+                    <option value="open">Abertos</option>
+                    <option value="closed">Cancelados</option>
+                </select>
+            </div>
 
             <div id="lista-relatorio">
 

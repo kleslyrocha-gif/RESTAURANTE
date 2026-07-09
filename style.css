@@ -148,6 +148,72 @@ nav button:hover {
     color: var(--text);
 }
 
+.fechamento-caixa-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.fechamento-caixa-header h2 {
+    margin-bottom: 0;
+}
+
+.btn-imprimir {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 0.92rem;
+    font-weight: 600;
+}
+
+.btn-imprimir:hover {
+    background: var(--primary-dark);
+}
+
+.fechamento-caixa-box {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.fechamento-caixa-total {
+    background: var(--success-light);
+    border: 1px solid #a7f3d0;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-weight: 700;
+    color: var(--success);
+}
+
+.fechamento-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface-muted);
+}
+
+@media print {
+    body {
+        background: white;
+    }
+
+    .card,
+    .fechamento-caixa-box,
+    .fechamento-item {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+        page-break-inside: avoid;
+    }
+}
+
 /* INPUTS */
 label {
     display: block;
@@ -175,12 +241,41 @@ select:focus {
     box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
 }
 
-.erro {
-    color: #b42318;
-    margin-top: -10px;
+.senha-wrapper {
+    position: relative;
     margin-bottom: 12px;
+}
+
+.senha-wrapper input {
+    margin-bottom: 0;
+    padding-right: 46px;
+}
+
+.btn-olho {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-size: 1rem;
+    padding: 4px;
+}
+
+.btn-olho:hover {
+    color: var(--primary);
+}
+
+.erro {
+    background: #fef2f2;
+    color: #b42318;
+    border: 1px solid #fecaca;
+    padding: 10px 12px;
+    border-radius: 12px;
+    margin-bottom: 14px;
+    font-size: 0.92rem;
     display: block;
-    font-size: 0.9rem;
 }
 
 /* LOGIN */
@@ -329,6 +424,18 @@ select:focus {
 
 .produto-filtro {
     margin-bottom: 18px;
+}
+
+.filtro-status-relatorio {
+    margin-bottom: 16px;
+}
+
+.filtro-status-relatorio label {
+    margin-bottom: 6px;
+}
+
+.filtro-status-relatorio select {
+    margin-bottom: 0;
 }
 
 .produto-filtro input {

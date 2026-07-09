@@ -207,6 +207,13 @@ break;
 
         $cliente_id = $conn->insert_id;
 
+        $checkForma = $conn->query("SHOW COLUMNS FROM pedidos LIKE 'forma_pagamento'");
+        if ($checkForma && $checkForma->num_rows === 0) {
+            $conn->query("ALTER TABLE pedidos ADD COLUMN forma_pagamento VARCHAR(20) DEFAULT NULL");
+        }
+
+        $formaPagamento = $conn->real_escape_string($dados['forma_pagamento'] ?? '');
+
         $sqlPedido = "
         INSERT INTO pedidos
         (
@@ -214,7 +221,8 @@ break;
             garcom_id,
             mesa,
             total,
-            status
+            status,
+            forma_pagamento
         )
         VALUES
         (
@@ -222,7 +230,8 @@ break;
             $garcom,
             $mesa,
             $total,
-            'open'
+            'open',
+            '$formaPagamento'
         )
         ";
 
@@ -311,6 +320,7 @@ break;
             g.nome garcom,
             COALESCE(SUM(ip.quantidade * ip.preco), 0) AS total,
             p.status,
+            p.forma_pagamento,
             p.data_pedido
         FROM pedidos p
         INNER JOIN clientes c
@@ -321,7 +331,7 @@ break;
             ON ip.pedido_id = p.id
         WHERE DATE(p.data_pedido) >= '$dataInicio'
         AND DATE(p.data_pedido) <= '$dataFim'
-        GROUP BY p.id, c.nome, p.mesa, g.nome, p.data_pedido
+        GROUP BY p.id, c.nome, p.mesa, g.nome, p.forma_pagamento, p.data_pedido
         ORDER BY p.id DESC
         ";
 
