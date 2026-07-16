@@ -1,6 +1,5 @@
 
 
-// Pedido atual
 let pedido = [];
 
 let pedidos = [];
@@ -31,11 +30,15 @@ function atualizarInterfacePorPerfil() {
 
     const botaoGerenciar = document.querySelector('nav button[data-tela="gerenciar"]');
     const botaoGerenciarProdutos = document.querySelector('nav button[data-tela="gerenciar-produtos"]');
+    const botaoRelatorio = document.querySelector('nav button[data-tela="relatorio"]');
     if (botaoGerenciar) {
         botaoGerenciar.style.display = perfil === 'gerente' ? 'inline-block' : 'none';
     }
     if (botaoGerenciarProdutos) {
         botaoGerenciarProdutos.style.display = perfil === 'gerente' ? 'inline-block' : 'none';
+    }
+    if (botaoRelatorio) {
+        botaoRelatorio.style.display = perfil === 'gerente' ? 'inline-block' : 'none';
     }
 
     const nav = document.getElementById('nav-principal');

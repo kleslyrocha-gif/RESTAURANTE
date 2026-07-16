@@ -2,7 +2,7 @@
 
 $host = "localhost";
 $usuario = "root";
-$senha = ""; // ou a senha do seu MySQL80
+$senha = ""; 
 $banco = "restaurante";
 
 $conn = new mysqli($host, $usuario, $senha, $banco);
