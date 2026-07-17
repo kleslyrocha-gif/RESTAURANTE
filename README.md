@@ -1,6 +1,7 @@
 # 🍽️ Sistema de Gerenciamento de Restaurante
 
 Sistema web desenvolvido para gerenciamento de um restaurante, permitindo o cadastro de clientes, garçons, produtos, mesas e pedidos, utilizando PHP, MySQL, HTML, CSS e JavaScript.
+
 Aluna: Klesly de Souza Rocha
 ---
 
